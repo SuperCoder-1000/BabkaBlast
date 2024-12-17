@@ -1,59 +1,71 @@
-import pgzrun
+import pygame
 import random
-import time
+
+# Initialize pygame
+pygame.init()
+
+# Define window size
+WIDTH = 600
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Babka Game")
+
+# Game variables
 speed = 0.5
 score = 0
 game_over = False
 time_remaining = 60.0
 
+# Load babka image
+babka_image = pygame.image.load('images/babka.png')
+babka_rect = babka_image.get_rect(center=(WIDTH / 2, HEIGHT / 2))
 
-# Define window size
-WIDTH = 600
-HEIGHT = 600
-
-babka = Actor('babka')   
-babka.pos = (WIDTH/2, HEIGHT/2)  # Center the actor
+# Font for text
+font = pygame.font.Font(None, 60)
 
 
 def draw():
-    screen.clear()
-    screen.fill((53,81,92))
-    babka.draw()
-    screen.draw.text(f"Score: {score}", topleft=(10,10), fontsize=60)
-    screen.draw.text(f"Time: {int(time_remaining)}", topleft=(400, 10), fontsize=60)
-    if game_over == True:
-      screen.fill((53,81,92))
-      screen.draw.text("Game Over", center=(300,300), fontsize=60)
-      if score == 1:
-          screen.draw.text(f"You got {score} babka!!!", center=(400,340), fontsize=60)
-      else:
-            screen.draw.text(f"You got {score} babkas!!!", center=(300,340), fontsize=60)
+    screen.fill((53, 81, 92))
+    screen.blit(babka_image, babka_rect)
+    score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+    time_text = font.render(f"Time: {int(time_remaining)}", True, (255, 255, 255))
+    screen.blit(score_text, (10, 10))
+    screen.blit(time_text, (400, 10))
+    if game_over:
+        game_over_text = font.render("Game Over", True, (255, 255, 255))
+        screen.blit(game_over_text, (300, 300))
+        if score == 1:
+            score_text = font.render(f"You got {score} babka!!!", True, (255, 255, 255))
+        else:
+            score_text = font.render(f"You got {score} babkas!!!", True, (255, 255, 255))
+        screen.blit(score_text, (300, 340))
+
+
 def place_babka():
     global speed
-    babka.x = random.randint(0, WIDTH)
-    babka.y = 0
-    speed = speed + 0.1
+    babka_rect.x = random.randint(0, WIDTH - babka_rect.width)
+    babka_rect.y = 0
+    speed += 0.1
+
 
 def time_up():
-   global game_over
-   game_over = True
-
-
-
+    global game_over
+    game_over = True
 
 
 def update():
     global speed
-    global game_over
-    babka.y = babka.y + speed
-    if babka.y > HEIGHT:
+    babka_rect.y += speed
+    if babka_rect.y > HEIGHT:
         place_babka()
+
 
 def on_mouse_down(pos):
     global score
-    if babka.collidepoint(pos):
-        score = score + 1
+    if babka_rect.collidepoint(pos):
+        score += 1
         place_babka()
+
 
 def update_timer():
     global time_remaining, game_over
@@ -61,9 +73,28 @@ def update_timer():
     if time_remaining <= 0:
         game_over = True
 
-clock.schedule(time_up, 60.0)
-clock.schedule_interval(update_timer, 1.0)
-place_babka()
 
-if __name__ == "__main__":
-    pgzrun.go()
+# Main game loop
+clock = pygame.time.Clock()
+place_babka()
+pygame.time.set_timer(pygame.USEREVENT, 1000)  # Timer event every second
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            on_mouse_down(event.pos)
+        elif event.type == pygame.USEREVENT:
+            update_timer()
+            if game_over:
+                pygame.time.set_timer(pygame.USEREVENT, 0)  # Stop timer
+
+    if not game_over:
+        update()
+    draw()
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
