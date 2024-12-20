@@ -3,8 +3,7 @@ name: Deploy Pygame to GitHub Pages
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -19,24 +18,21 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install System Dependencies
+    - name: Install Pygbag
       run: |
-        sudo apt-get update
-        sudo apt-get install -y ffmpeg
-        python -m pip install black
-
-    - name: Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        echo "Attempting to install pygbag"
+        python -m pip install pygbag
+        echo "Successfully installed pygbag"
 
     - name: Build Pygame Project
       run: |
-        mkdir -p build
-        pygbag --archive ./src
+        echo "Attempting to build the game"
+        python -m pygbag --build $GITHUB_WORKSPACE/src/main.py
+        echo "Successfully built the game and compiled to WebAssembly"
 
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+      uses: JamesIves/github-pages-deploy-action@4.1.7
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./build/web
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: gh-pages
+        folder: src/build/web
