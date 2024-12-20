@@ -31,7 +31,7 @@ async def main():
     # Game variables
     score = 0
     game_over = False
-    time_remaining = 60.8
+    time_remaining = 60.0
     start_time = pygame.time.get_ticks() / 1000
     FPS = 60
 
@@ -62,7 +62,7 @@ async def main():
         
         if not game_over:
             current_time = pygame.time.get_ticks() / 1000
-            time_remaining = max(0, 60.8 - (current_time - start_time))
+            time_remaining = max(0, 60.0 - (current_time - start_time))
             if time_remaining <= 0:
                 time_remaining = 0
                 game_over = True
@@ -78,9 +78,12 @@ async def main():
         screen.blit(time_text, (10, 50))
         
         if game_over:
+            screen.fill((125,249,255))
             font_large = pygame.font.Font(None, 74)
             game_over_text = font_large.render('Game Over!', True, (255, 0, 0))
+            final_score = font_large.render(f'Final Score: {score}', True, (0, 0, 0))
             screen.blit(game_over_text, (200, 250))
+            screen.blit(final_score, (180, 350))
         
         pygame.display.flip()
         Clock.tick(FPS)
