@@ -1,0 +1,38 @@
+name: Deploy Pygame to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'
+
+    - name: Install Pygbag
+      run: |
+        echo "Attempting to install pygbag"
+        python -m pip install pygbag
+        echo "Successfully installed pygbag"
+
+    - name: Build Pygame Project
+      run: |
+        echo "Attempting to build the game"
+        python -m pygbag --build $GITHUB_WORKSPACE/src/main.py
+        echo "Successfully built the game and compiled to WebAssembly"
+
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@4.1.7
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: gh-pages
+        folder: src/build/web
