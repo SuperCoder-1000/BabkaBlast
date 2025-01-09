@@ -51,6 +51,11 @@ async def main():
                     score += 1
                     babka.speed += 0.25
                     babka.reset_position()
+            elif event.type == pygame.FINGERDOWN and not game_over:
+                if babka.rect.collidepoint(event.pos):
+                    score += 1
+                    babka.speed += 0.25
+                    babka.reset_position()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     score = 0
@@ -76,6 +81,7 @@ async def main():
         time_text = font.render(f'Time: {int(time_remaining)}', True, (0, 0, 0))
         screen.blit(score_text, (10, 10))
         screen.blit(time_text, (10, 50))
+        
         
         if game_over:
             screen.fill((125,249,255))
